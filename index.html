@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebCam App</title>
+    <style>
+        body { text-align: center; font-family: Arial, sans-serif; }
+        video, canvas { width: 100%; max-width: 400px; }
+        button { margin: 5px; padding: 10px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <h2>📷 Cámara Web</h2>
+    <video id="video" autoplay></video>
+    <br>
+    <button onclick="capturar()">📸 Capturar</button>
+    <button onclick="cambiarCamara()">🔄 Voltear Cámara</button>
+    <br>
+    <canvas id="canvas"></canvas>
+    <a id="descargar" style="display:none"></a>
+
+    <script>
+        let video = document.getElementById("video");
+        let canvas = document.getElementById("canvas");
+        let ctx = canvas.getContext("2d");
+        let stream = null;
+        let camaraFrontal = false;
+
+        async function iniciarCamara() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+            stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: camaraFrontal ? "user" : "environment" }
+            });
+            video.srcObject = stream;
+        }
+
+        function capturar() {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            let imagen = canvas.toDataURL("image/png");
+            let link = document.getElementById("descargar");
+            link.href = imagen;
+            link.download = "captura.png";
+            link.style.display = "block";
+            link.textContent = "📥 Descargar Imagen";
+            document.body.appendChild(link);
+        }
+
+        function cambiarCamara() {
+            camaraFrontal = !camaraFrontal;
+            iniciarCamara();
+        }
+
+        iniciarCamara();
+    </script>
+
+</body>
+</html>
